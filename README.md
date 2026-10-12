@@ -1,6 +1,8 @@
 # Pipe Time customer app
 
-Run with Python 3.12 or newer: `python server.py` from this directory. Open port 3000 in your development preview. No package installation is required.
+Run with Python 3.12 or newer from this directory: create a virtual environment, install `requirements.txt`, and run `gunicorn app:app --bind 0.0.0.0:3000`. Open port 3000 in your development preview. The legacy `server.py` supports forms only; use `app.py` for client accounts.
+
+The `/login` client page supports registration, sign-in, sign-out, and private message history for messages sent while authenticated. Passwords use scrypt hashing; sessions expire after 24 hours. These accounts are separate from Housecall Pro. Email verification and password reset remain unimplemented. Persistent storage is required to retain accounts across deployments; see `DEPLOY.md`.
 
 Booking buttons open the supplied Housecall Pro Online Booking widget. Configure services, available hours, scheduling rules, and confirmation behavior in Housecall Pro. Availability is supplied by that provider, not the local app. If its script is blocked or unavailable, customers see a retry message and phone number. Live provider availability has not been verified from this workspace because outbound access to its domain was denied.
 
