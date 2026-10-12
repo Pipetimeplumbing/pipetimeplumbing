@@ -75,6 +75,34 @@ def account():
         rows = db.execute('SELECT id,kind,payload,created_at FROM requests WHERE client_id=? ORDER BY created_at DESC LIMIT 50', (client['id'],)).fetchall()
     return jsonify(client=client, requests=[dict(id=r[0], kind=r[1], details=json.loads(r[2]), created_at=r[3]) for r in rows])
 
+@app.post('/api/account/delete')
+def delete_account():
+    client = current_client()
+    if not client:
+        return jsonify(error='Please sign in.'), 401
+    data = request.get_json(silent=True)
+    password = data.get('password') if isinstance(data, dict) else None
+    if not isinstance(password, str) or not 12 <= len(password) <= 128:
+        return jsonify(error='Enter your password to confirm deletion.'), 400
+    now = int(time.time())
+    key = 'delete:' + client['id']
+    with sqlite3.connect(DB) as db:
+        db.execute('DELETE FROM auth_attempts WHERE timestamp<?', (now-900,))
+        if db.execute('SELECT COUNT(*) FROM auth_attempts WHERE ip=?', (key,)).fetchone()[0] >= 15:
+            return jsonify(error='Too many attempts. Please try again in 15 minutes.'), 429
+        db.execute('INSERT INTO auth_attempts VALUES (?,?)', (key, now))
+    with sqlite3.connect(DB) as db:
+        row = db.execute('SELECT password_hash FROM clients WHERE id=?', (client['id'],)).fetchone()
+        if not row or not check_password_hash(row[0], password):
+            return jsonify(error='Password is incorrect.'), 401
+        db.execute('DELETE FROM sessions WHERE client_id=?', (client['id'],))
+        db.execute('DELETE FROM requests WHERE client_id=?', (client['id'],))
+        db.execute('DELETE FROM clients WHERE id=?', (client['id'],))
+        db.execute('DELETE FROM auth_attempts WHERE ip=?', (key,))
+    response = jsonify(ok=True)
+    response.delete_cookie('pipe_time_session', path='/')
+    return response
+
 @app.post('/api/auth/<action>')
 def authenticate(action):
     if action == 'logout':

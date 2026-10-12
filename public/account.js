@@ -55,3 +55,21 @@ document.getElementById('logout').onclick=async () => {
   finally {button.disabled=false;}
 };
 loadAccount().catch(error => {document.getElementById('auth-status').textContent=error.message;});
+
+const deleteForm = document.getElementById('delete-account-form');
+deleteForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!window.confirm('Permanently delete your Pipe Time app account and its messages? This cannot be undone.')) return;
+  const button = deleteForm.querySelector('button');
+  const status = document.getElementById('delete-status');
+  button.disabled = true;
+  try {
+    const response = await fetch('/api/account/delete', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(deleteForm)))});
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Unable to delete your account.');
+    deleteForm.reset();
+    await loadAccount();
+    document.getElementById('auth-status').textContent = 'Your account and associated app messages have been deleted.';
+  } catch(error) {status.className='status error';status.textContent=error.message;}
+  finally {button.disabled=false;}
+});

@@ -1,3 +1,6 @@
 data/
 __pycache__/
 .venv/
+mobile-ios/*.xcodeproj/
+mobile-ios/PipeTime/Info.plist
+*.xcuserstate
