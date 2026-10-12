@@ -4,3 +4,5 @@
 nav>a.client-link{display:block}
 
 nav>a.payment-link{display:block}@media(max-width:600px){header nav{gap:10px;flex-wrap:wrap;justify-content:flex-end}nav>a.payment-link,nav>a.client-link{font-size:11px}header{gap:12px}}
+
+.hero-contact{display:inline-block;margin-top:24px;font-size:16px}.hero-contact strong{color:var(--orange)}.hero-contact:hover{text-decoration:underline}
