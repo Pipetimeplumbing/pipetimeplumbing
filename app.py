@@ -52,7 +52,7 @@ def login_page():
 
 @app.get('/pay')
 def payment_page():
-    url = os.environ.get('PAYMENT_URL', '').strip()
+    url = os.environ.get('PAYMENT_URL', 'https://buy.stripe.com/28E3cngMAcbh9vY5WEgEg02').strip()
     try:
         parsed = urlsplit(url)
         valid = parsed.scheme == 'https' and bool(parsed.hostname) and not parsed.username and not parsed.password and not any(c.isspace() for c in url)

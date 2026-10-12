@@ -9,7 +9,7 @@ Create a Python Web Service connected to `Pipetimeplumbing/pipetimeplumbing` aft
 - Health check path: `/health`
 - Persistent disk mount path: `/var/data`
 - Environment variable: `DATABASE_PATH=/var/data/requests.sqlite`
-- Optional environment variable: `PAYMENT_URL` — your public HTTPS payment page from Housecall Pro, Stripe, PayPal, or another processor. Do not use a password or API key. The Make a payment button opens this page; until configured, it shows billing assistance with the business phone number. No card information is collected or stored by this app, and no invoice amount or payment status is inferred.
+- Optional environment variable: `PAYMENT_URL` — overrides the business-provided Stripe link `https://buy.stripe.com/28E3cngMAcbh9vY5WEgEg02`. Do not use a password or API key. The Make a payment button opens the configured page; an explicitly empty or invalid override shows billing assistance with the business phone number. No card information is collected or stored by this app, and no invoice amount or payment status is inferred. Payment confirmations and reconciliation are handled in Stripe; this app does not mark invoices as paid.
 
 A persistent disk requires a compatible paid Render service. Check current pricing before creating it. Without a disk, the local SQLite database is temporary and is not suitable for real customer requests. For a free deployment, use an external persistent database instead; that integration is not implemented here.
 
