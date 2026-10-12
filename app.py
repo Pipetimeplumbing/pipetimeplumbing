@@ -8,7 +8,7 @@ import time
 from urllib.parse import urlsplit
 from datetime import date
 from pathlib import Path
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 from werkzeug.security import generate_password_hash, check_password_hash
 
 ROOT = Path(__file__).parent
@@ -49,6 +49,22 @@ def current_client():
 @app.get('/login')
 def login_page():
     return app.send_static_file('login.html')
+
+@app.get('/pay')
+def payment_page():
+    url = os.environ.get('PAYMENT_URL', '').strip()
+    try:
+        parsed = urlsplit(url)
+        valid = parsed.scheme == 'https' and bool(parsed.hostname) and not parsed.username and not parsed.password and not any(c.isspace() for c in url)
+    except ValueError:
+        valid = False
+    if valid:
+        response = redirect(url, code=302)
+    else:
+        response = app.make_response(app.send_static_file('payment.html'))
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['Referrer-Policy'] = 'no-referrer'
+    return response
 
 @app.get('/api/account')
 def account():
