@@ -1,11 +1,25 @@
-const dateInput = document.querySelector('input[type=date]');
-const today = new Date();
-dateInput.min = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-document.querySelectorAll('[data-service]').forEach(button => button.addEventListener('click', () => {
-  document.querySelector('select[name=service]').value = button.dataset.service;
-  document.querySelector('#book').scrollIntoView({behavior:'smooth'});
-}));
-for (const [id, endpoint] of [['booking-form','appointments'],['message-form','messages']]) {
+const bookingStatus = document.getElementById('booking-status');
+function openBooking(event) {
+  event.preventDefault();
+  if (window.HCPWidget && typeof window.HCPWidget.openModal === 'function') {
+    try {
+      window.HCPWidget.openModal();
+      bookingStatus.textContent = '';
+      bookingStatus.className = 'status';
+      return;
+    } catch (error) {
+      // Let the customer retry or call if the booking provider fails.
+    }
+  }
+  bookingStatus.className = 'status error';
+  bookingStatus.textContent = 'Online booking is still loading or temporarily unavailable. Please try again in a moment, or call 401-400-5521.';
+  document.getElementById('book').scrollIntoView({behavior: 'smooth'});
+}
+// Use the provider's service selection and availability without inventing slots.
+document.querySelectorAll('a[href="#book"], [data-service], [data-hcp-booking]').forEach(button => {
+  button.addEventListener('click', openBooking);
+});
+for (const [id, endpoint] of [['message-form','messages']]) {
   const form = document.getElementById(id);
   form.addEventListener('submit', async event => {
     event.preventDefault();
@@ -19,7 +33,7 @@ for (const [id, endpoint] of [['booking-form','appointments'],['message-form','m
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Unable to send your request.');
       status.className = 'status success';
-      status.textContent = endpoint === 'appointments' ? `Appointment request saved. Your time is not yet confirmed. Reference: ${result.id}.` : `Message saved for the team. Reference: ${result.id}. For immediate help, call 401-400-5521.`;
+      status.textContent = `Message saved for the team. Reference: ${result.id}. For immediate help, call 401-400-5521.`;
       form.reset();
     } catch (error) {
       status.className = 'status error';
